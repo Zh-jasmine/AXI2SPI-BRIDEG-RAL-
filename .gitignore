@@ -1,0 +1,17 @@
+# 仿真生成文件
+simv
+simv.daidir/
+csrc/
+*.fsdb
+*.log
+vc_hdrs.h
+novasLog/
+verdiLog/
+novas.conf
+cov_report/
+*.key
+.vcs*
+
+# 临时文件
+_vplan_unzip/
+cmd_bridge.sh

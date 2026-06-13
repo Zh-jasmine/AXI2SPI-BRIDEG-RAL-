@@ -22,7 +22,9 @@ class axi_driver extends uvm_driver #(axi_seq_item);
         super.run_phase(phase);
 
         fork
-        get_and_drive();// 任务 1：从 sequencer 拿 item，驱动总线
+        // 任务 1：驱动总线。concurrent_mode=1 时读写分流到独立通道线程并发
+        if (axi_cfg.concurrent_mode) get_and_drive_concurrent();
+        else                         get_and_drive();
         reset_signals();// 任务 2：监视复位，复位时清除所有 VALID 信号
 
         join_none
@@ -42,6 +44,38 @@ class axi_driver extends uvm_driver #(axi_seq_item);
             seq_item_port.item_done();
         end
     endtask : get_and_drive
+
+    // 并发模式：dispatch 把读/写 item 分流到两条独立通道线程。
+    //   写线程串行驱动 AW/W/B，读线程串行驱动 AR/R——两组信号不相交，
+    //   故 AR 与 AW 可在同一周期活动，验证 DUT 读写通道互不阻塞、不死锁。
+    //   注意：读数据回传(rdata_o)在本模式下不保证（dispatch 提前 item_done），
+    //         读仅用于制造 AR 流量并验证读响应；写数据正确性由 scoreboard 比对。
+    task get_and_drive_concurrent();
+        mailbox #(axi_seq_item) wr_mbx = new();
+        mailbox #(axi_seq_item) rd_mbx = new();
+        fork
+            // 写通道线程：串行消费写队列
+            forever begin
+                axi_seq_item wit;
+                wr_mbx.get(wit);
+                drive_write(wit);
+            end
+            // 读通道线程：串行消费读队列
+            forever begin
+                axi_seq_item rit;
+                rd_mbx.get(rit);
+                drive_read(rit);
+            end
+            // dispatch：取 item 按方向入队，立即 item_done 放行下一笔
+            forever begin
+                axi_seq_item item;
+                seq_item_port.get_next_item(item);
+                if (item.write) wr_mbx.put(item);
+                else            rd_mbx.put(item);
+                seq_item_port.item_done();
+            end
+        join_none
+    endtask : get_and_drive_concurrent
 
     task drive_write(axi_seq_item item);
         // AW 和 W 通道支持三种时序：

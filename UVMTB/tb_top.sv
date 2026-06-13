@@ -66,6 +66,7 @@ import uvm_pkg::*;
 `include "test/axi_busy_test.sv"
 `include "test/axi_handshake_test.sv"
 `include "test/axi_wstrb_test.sv"
+`include "test/axi_concurrent_test.sv"
 // RAL test
 `include "test/ral_test.sv"
 // Reset tests

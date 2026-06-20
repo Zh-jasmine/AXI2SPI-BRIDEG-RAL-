@@ -14,31 +14,23 @@ class spi_word_len_test extends test_base;
         phase.raise_objection(this);
         #200;
 
-        foreach_word_len(2'b10, 32'hAB,       20000);   // 8-bit
-        foreach_word_len(2'b01, 32'h1234,     40000);   // 16-bit
-        foreach_word_len(2'b00, 32'h89ABCDEF, 80000);   // 32-bit
-        foreach_word_len(2'b11, 32'hA,        10000);   // 4-bit
+        foreach_word_len(2'b10, 32'hAB);   // 8-bit
+        foreach_word_len(2'b01, 32'h1234);   // 16-bit
+        foreach_word_len(2'b00, 32'h89ABCDEF);   // 32-bit
+        foreach_word_len(2'b11, 32'hA);   // 4-bit
 
         phase.drop_objection(this);
     endtask : run_phase
 
     local task automatic foreach_word_len(
         input bit [1:0]  word_len_enc,
-        input bit [31:0] wdata,
-        input int        wait_ns
+        input bit [31:0] wdata
     );
         axi_spi_cfg_seq seq = axi_spi_cfg_seq::type_id::create("seq");
-
-        seq.cfg_word_len  = 1;
-        seq.word_len_enc  = word_len_enc;
-        seq.cfg_mosi_data = 1;
-        seq.mosi_data     = wdata;
-        seq.cfg_cs_sck    = 1;
-        seq.cs_sck        = 8'h4;
-        seq.do_start      = 1;
-        seq.wait_ns       = wait_ns;
-
+        seq.word_len_i  = word_len_enc;
+        seq.mosi_data_i     = wdata;
         seq.start(env.axi_agt.axi_sqr);
+        wait_spi_frame_done();
     endtask : foreach_word_len
 
 endclass : spi_word_len_test

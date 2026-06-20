@@ -17,24 +17,17 @@ class axi_handshake_test extends test_base;
 
     task automatic send_frame(int unsigned aw_dly, int unsigned w_dly,
                               bit [31:0] data, string desc);
-        automatic axi_spi_cfg_seq cfg;
         automatic axi_write_seq   wr;
         virtual spi_interface spi_vif = env_cfg.spi_cfg.vif;
 
         `uvm_info(get_name(), $sformatf("--- %s (aw_delay=%0d, w_delay=%0d, data=0x%0h) ---",
             desc, aw_dly, w_dly, data), UVM_LOW)
+        cfg_spi_defaults();
 
-        // 完整配置 SPI 参数
-        cfg = axi_spi_cfg_seq::type_id::create("cfg");
-        cfg.cfg_word_len  = 1;  cfg.word_len_enc  = 2'b10;   // 8-bit
-        cfg.cfg_spi_mode  = 1;  cfg.spi_mode_enc  = 2'b00;   // Mode 0
-        cfg.cfg_sck_speed = 1;  cfg.sck_speed_enc = 2'b11;   // /16
-        cfg.cfg_cs_sck    = 1;  cfg.cs_sck        = 8'h4;
-        cfg.cfg_sck_cs    = 1;  cfg.sck_cs        = 8'h4;
-        cfg.cfg_ifg       = 1;  cfg.ifg           = 8'h4;
-        cfg.cfg_mosi_data = 1;  cfg.mosi_data     = data;
-        cfg.do_start      = 0;
-        cfg.start(env.axi_agt.axi_sqr);
+        wr = axi_write_seq::type_id::create("wr_data");
+        wr.waddr = 32'h20;
+        wr.wdata = data;
+        wr.start(env.axi_agt.axi_sqr);
 
         // start=0（带握手延迟）
         wr = axi_write_seq::type_id::create("wr0");

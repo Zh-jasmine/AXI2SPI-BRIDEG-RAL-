@@ -34,22 +34,10 @@ class axi_concurrent_test extends test_base;
 
     task run_phase(uvm_phase phase);
         virtual axi_interface vif = env_cfg.axi_cfg.vif;
-        automatic axi_spi_cfg_seq cfg;
         bit wr_done = 0;
 
         phase.raise_objection(this);
         #200;   // 等复位释放
-
-        // ---- 一次性配置 SPI 参数（8-bit / Mode 0 / /16）----
-        cfg = axi_spi_cfg_seq::type_id::create("cfg");
-        cfg.cfg_word_len  = 1;  cfg.word_len_enc  = 2'b10;
-        cfg.cfg_spi_mode  = 1;  cfg.spi_mode_enc  = 2'b00;
-        cfg.cfg_sck_speed = 1;  cfg.sck_speed_enc = 2'b11;
-        cfg.cfg_cs_sck    = 1;  cfg.cs_sck        = 8'h4;
-        cfg.cfg_sck_cs    = 1;  cfg.sck_cs        = 8'h4;
-        cfg.cfg_ifg       = 1;  cfg.ifg           = 8'h4;
-        cfg.do_start      = 0;
-        cfg.start(env.axi_agt.axi_sqr);
 
         // ---- 并发证据监控：AR 与 AW/W 同周期活动 ----
         fork : mon_blk
@@ -67,9 +55,9 @@ class axi_concurrent_test extends test_base;
                 for (int i = 0; i < 6; i++) begin
                     automatic axi_spi_cfg_seq f =
                         axi_spi_cfg_seq::type_id::create($sformatf("f%0d", i));
-                    f.cfg_mosi_data = 1;  f.mosi_data = 32'hC0 + i;
-                    f.do_start      = 1;  f.wait_ns   = 20000;
-                    f.start(env.axi_agt.axi_sqr);
+        f.mosi_data_i = 32'hC0 + i;
+        f.start(env.axi_agt.axi_sqr);
+        wait_spi_frame_done();
                 end
                 wr_done = 1;
             end

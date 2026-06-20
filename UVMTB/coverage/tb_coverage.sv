@@ -1,10 +1,4 @@
-// ============================================================
-// tb_coverage — Functional Coverage 收集
-//   双订阅：
-//     SPI monitor → 每笔实际 SPI 传输的 spi_mode/word_len/spi_data（采样点）
-//     AXI monitor → 跟踪 sck_speed（slv_reg3=0x0C 写，spi_seq_item 里没有）
-//   每抓到一笔 SPI 传输就 sample 一次 covergroup。
-// ============================================================
+
 `ifndef TB_COVERAGE_SV
 `define TB_COVERAGE_SV
 

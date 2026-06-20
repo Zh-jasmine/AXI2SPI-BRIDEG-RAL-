@@ -21,15 +21,9 @@ class reset_sva_test extends test_base;
 
     task automatic cfg_one_frame(bit [31:0] data);
         automatic axi_spi_cfg_seq seq = axi_spi_cfg_seq::type_id::create("seq_frame");
-        seq.cfg_word_len  = 1;  seq.word_len_enc  = 2'b10;
-        seq.cfg_spi_mode  = 1;  seq.spi_mode_enc  = 2'b00;
-        seq.cfg_sck_speed = 1;  seq.sck_speed_enc = 2'b11;
-        seq.cfg_cs_sck    = 1;  seq.cs_sck        = 8'h4;
-        seq.cfg_sck_cs    = 1;  seq.sck_cs        = 8'h4;
-        seq.cfg_ifg       = 1;  seq.ifg           = 8'h4;
-        seq.cfg_mosi_data = 1;  seq.mosi_data     = data;
-        seq.do_start      = 1;  seq.wait_ns       = 20000;
+        seq.mosi_data_i     = data;
         seq.start(env.axi_agt.axi_sqr);
+        wait_spi_frame_done();
     endtask
 
     task run_phase(uvm_phase phase);
@@ -47,26 +41,19 @@ class reset_sva_test extends test_base;
         // ---- B: reset during AXI config writes ----
         `uvm_info(get_name(), "[B] reset during AXI config writes", UVM_LOW)
         cfg = axi_spi_cfg_seq::type_id::create("cfgB");
-        cfg.cfg_word_len  = 1;  cfg.word_len_enc  = 2'b01;
-        cfg.cfg_spi_mode  = 1;  cfg.spi_mode_enc  = 2'b11;
-        cfg.cfg_sck_speed = 1;  cfg.sck_speed_enc = 2'b10;
-        cfg.do_start = 0;
+        cfg.word_len_i  = 2'b01;
+        cfg.spi_mode_i  = 2'b11;
+        cfg.sck_speed_i = 2'b10;
+        cfg.start_i = 0;
         cfg.start(env.axi_agt.axi_sqr);
         reset_pulse(150);
         #200;
 
         // ---- C: reset mid transaction ----
         `uvm_info(get_name(), "[C] reset mid transaction", UVM_LOW)
-        cfg = axi_spi_cfg_seq::type_id::create("cfgC");
-        cfg.cfg_word_len  = 1;  cfg.word_len_enc  = 2'b10;
-        cfg.cfg_spi_mode  = 1;  cfg.spi_mode_enc  = 2'b00;
-        cfg.cfg_sck_speed = 1;  cfg.sck_speed_enc = 2'b11;
-        cfg.cfg_cs_sck    = 1;  cfg.cs_sck        = 8'h4;
-        cfg.cfg_sck_cs    = 1;  cfg.sck_cs        = 8'h4;
-        cfg.cfg_ifg       = 1;  cfg.ifg           = 8'h4;
-        cfg.cfg_mosi_data = 1;  cfg.mosi_data     = 32'hA5;
-        cfg.do_start = 0;
-        cfg.start(env.axi_agt.axi_sqr);
+        cfg_spi_defaults();
+        wr = axi_write_seq::type_id::create("wr_data");
+        wr.waddr = 32'h20;  wr.wdata = 32'hA5;  wr.start(env.axi_agt.axi_sqr);
         wr = axi_write_seq::type_id::create("wr0");
         wr.waddr = 32'h00;  wr.wdata = 32'h0;  wr.start(env.axi_agt.axi_sqr);
         wr = axi_write_seq::type_id::create("wr1");

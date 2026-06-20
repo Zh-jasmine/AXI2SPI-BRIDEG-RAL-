@@ -1,25 +1,17 @@
 class axi_seq_item extends uvm_sequence_item;
 
-    string item_type;
-    string name;
-
-    // Transaction fields (rand = driven by sequence/driver)
-    rand bit        write;                       // 1 = write, 0 = read
+    rand bit        write;                 
     rand bit [31:0] addr;
-    rand bit [31:0] wdata;                       // write data
-    rand bit [ 3:0] wstrb;                       // byte enables
+    rand bit [31:0] wdata;                   
+    rand bit [ 3:0] wstrb;                       
 
-    // AW/W channel delay control (write only)
-    // aw_delay > w_delay → W arrives first
-    // aw_delay < w_delay → AW arrives first
-    // aw_delay == w_delay → simultaneous (default)
-    rand int unsigned aw_delay;                  // clocks before asserting AWVALID
-    rand int unsigned w_delay;                   // clocks before asserting WVALID
+ 
+    rand int unsigned aw_delay;                  
+    rand int unsigned w_delay;                  
 
-    // Response fields (filled by monitor)
-    bit [31:0] rdata;                            // read data
-    bit [ 1:0] bresp;                            // write response
-    bit [ 1:0] rresp;                            // read response
+    bit [31:0] rdata;                           
+    bit [ 1:0] bresp;                         
+    bit [ 1:0] rresp;                          
 
     // Constraints
     constraint c_addr_aligned { addr[1:0] == 2'b00; }
@@ -27,8 +19,6 @@ class axi_seq_item extends uvm_sequence_item;
     constraint c_delay_default { aw_delay == 0; w_delay == 0; }
 
     `uvm_object_utils_begin(axi_seq_item)
-        `uvm_field_string(item_type, UVM_DEFAULT)
-        `uvm_field_string(name, UVM_DEFAULT)
         `uvm_field_int(write, UVM_DEFAULT)
         `uvm_field_int(addr, UVM_DEFAULT)
         `uvm_field_int(wdata, UVM_DEFAULT)

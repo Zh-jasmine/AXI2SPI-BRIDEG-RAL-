@@ -21,24 +21,16 @@ class spi_random_test extends test_base;
 
         for (int i = 0; i < num_frames; i++) begin
             seq = axi_spi_cfg_seq::type_id::create($sformatf("rand%0d", i));
-            seq.cfg_word_len  = 1;
-            seq.cfg_spi_mode  = 1;
-            seq.cfg_sck_speed = 1;
-            seq.cfg_cs_sck    = 1;
-            seq.cfg_sck_cs    = 1;
-            seq.cfg_ifg       = 1;
-            seq.cfg_mosi_data = 1;
-            seq.do_start      = 1;
 
             if (!seq.randomize() with {
-                cs_sck inside {[2:8]};
-                sck_cs inside {[2:8]};
-                ifg    inside {[1:8]};
+                cs_sck_i inside {[2:8]};
+                sck_cs_i inside {[2:8]};
+                ifg_i    inside {[1:8]};
             })
                 `uvm_error(get_name(), "axi_spi_cfg_seq randomize failed")
 
-            seq.wait_ns = 60000;
-            seq.start(env.axi_agt.axi_sqr);
+        seq.start(env.axi_agt.axi_sqr);
+        wait_spi_frame_done();
         end
 
         `uvm_info(get_name(), $sformatf("random regression done: %0d frames", num_frames), UVM_LOW)

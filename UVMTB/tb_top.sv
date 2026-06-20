@@ -108,21 +108,29 @@ module tb_top;
     assign spi_vif.SCLK    = SCK;
     assign spi_vif.MOSI    = MOSI;
     assign spi_vif.CS      = CS;
+    // ============================================================
+    // SVA: CS_SCK (EXP=2,4,8)
+    // ============================================================
+    spi_cs_sck_sva #(.EXP(2)) u_cs_sck_2 (
+        .GCLK(spi_vif.GCLK),
+        .SCLK(spi_vif.SCLK),
+        .CS  (spi_vif.CS),
+        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 2)
+    );
 
-    // ============================================================
-    // SVA: CS_SCK (generate 3 档: EXP=2,4,8)
-    // ============================================================
-    generate
-        for (genvar g = 0; g < 3; g++) begin : gen_cs_sck
-            localparam int VAL = (g == 0) ? 2 : (g == 1) ? 4 : 8;
-            spi_cs_sck_sva #(.EXP(VAL)) u (
-                .GCLK(spi_vif.GCLK),
-                .SCLK(spi_vif.SCLK),
-                .CS  (spi_vif.CS),
-                .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == VAL)
-            );
-        end
-    endgenerate
+    spi_cs_sck_sva #(.EXP(4)) u_cs_sck_4 (
+        .GCLK(spi_vif.GCLK),
+        .SCLK(spi_vif.SCLK),
+        .CS  (spi_vif.CS),
+        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 4)
+    );
+
+    spi_cs_sck_sva #(.EXP(8)) u_cs_sck_8 (
+        .GCLK(spi_vif.GCLK),
+        .SCLK(spi_vif.SCLK),
+        .CS  (spi_vif.CS),
+        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 8)
+    );
 
     // ============================================================
     // SVA: SCK speed (generate 4 档: PER=128,64,32,16)

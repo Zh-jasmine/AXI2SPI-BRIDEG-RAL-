@@ -25,9 +25,7 @@ import uvm_pkg::*;
 `include "spi/spi_monitor.sv"
 
 // SVA checkers
-`include "sva/spi_reset_sva.sv"
 `include "sva/spi_sva_checker.sv"
-`include "sva/axi_reset_sva.sv"
 `include "sva/axi_sva_checker.sv"
 
 // Scoreboard
@@ -122,23 +120,17 @@ module tb_top;
     axi_sva_checker u_axi_sva_checker (
         .ACLK   (s00_axi_aclk),
         .ARESETn(s00_axi_aresetn),
-        .AWADDR (axi_vif.AWADDR),
         .AWVALID(axi_vif.AWVALID),
         .AWREADY(axi_vif.AWREADY),
-        .WDATA  (axi_vif.WDATA),
-        .WSTRB  (axi_vif.WSTRB),
         .WVALID (axi_vif.WVALID),
         .WREADY (axi_vif.WREADY),
         .BRESP  (axi_vif.BRESP),
         .BVALID (axi_vif.BVALID),
-        .BREADY (axi_vif.BREADY),
-        .ARADDR (axi_vif.ARADDR),
         .ARVALID(axi_vif.ARVALID),
         .ARREADY(axi_vif.ARREADY),
         .RDATA  (axi_vif.RDATA),
         .RRESP  (axi_vif.RRESP),
-        .RVALID (axi_vif.RVALID),
-        .RREADY (axi_vif.RREADY)
+        .RVALID (axi_vif.RVALID)
     );
 
     // ============================================================

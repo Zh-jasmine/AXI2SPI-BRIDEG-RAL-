@@ -26,8 +26,8 @@ class tb_environment extends uvm_env;
         uvm_config_db#(axi_config)::set(this, "spi_mtr", "axi_config", env_cfg.axi_cfg);
         spi_mtr = spi_monitor::type_id::create("spi_mtr", this);
 
+        uvm_config_db#(axi_config)::set(this, "scb", "axi_config", env_cfg.axi_cfg);
         scb = tb_scoreboard::type_id::create("scb", this);
-        scb.axi_cfg = env_cfg.axi_cfg;
 
         cov = tb_coverage::type_id::create("cov", this);
     endfunction : build_phase

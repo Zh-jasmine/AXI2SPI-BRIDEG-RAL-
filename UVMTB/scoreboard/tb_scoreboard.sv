@@ -26,38 +26,41 @@ class tb_scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
         axi_export = new("axi_export", this);
         spi_export = new("spi_export", this);
+
+        if (!uvm_config_db#(axi_config)::get(this, "", "axi_config", axi_cfg)) begin
+            `uvm_fatal(get_name(), "axi_config not found in config_db")
+        end
     endfunction : build_phase
 
-    
     function void write_axi(axi_seq_item item);
-    uvm_hdl_data_t val;
-    bit [1:0]      word_len;
-    bit [31:0]     exp_data;
+        uvm_hdl_data_t val;
+        bit [1:0]      word_len;
+        bit [31:0]     exp_data;
 
-    if (!item.write)
-        return;
+        if (!item.write)
+            return;
 
-    if (item.addr[5:2] != SPI_DATA_ADDR[5:2])
-        return;
+        if (item.addr[5:2] != SPI_DATA_ADDR[5:2])
+            return;
 
-    if (!uvm_hdl_read("tb_top.DUT.AXI_SPI_n_regs0.slv_reg4", val)) begin
-        `uvm_error("SCB", "read slv_reg4 failed")
-        word_len = 2'd2;
-    end else begin
-        word_len = val[1:0];
-    end
+        if (!uvm_hdl_read(WORD_LEN_HDL_PATH, val)) begin
+            `uvm_error("SCB", "read slv_reg4 failed")
+            word_len = 2'd2;
+        end else begin
+            word_len = val[1:0];
+        end
 
-    case (word_len)
-        2'd0:    exp_data = item.wdata;
-        2'd1:    exp_data = {16'd0, item.wdata[15:0]};
-        2'd2:    exp_data = {24'd0, item.wdata[7:0]};
-        2'd3:    exp_data = {28'd0, item.wdata[3:0]};
-        default: exp_data = {24'd0, item.wdata[7:0]};
-    endcase
+        case (word_len)
+            2'd0:    exp_data = item.wdata;
+            2'd1:    exp_data = {16'd0, item.wdata[15:0]};
+            2'd2:    exp_data = {24'd0, item.wdata[7:0]};
+            2'd3:    exp_data = {28'd0, item.wdata[3:0]};
+            default: exp_data = {24'd0, item.wdata[7:0]};
+        endcase
 
-    expected_data_q.push_back(exp_data);
-endfunction
-
+        expected_data_q.push_back(exp_data);
+        axi_write_data_count++;
+    endfunction : write_axi
 
     function void write_spi(spi_seq_item item);
         bit [31:0] exp_data;
@@ -86,9 +89,8 @@ endfunction
     task run_phase(uvm_phase phase);
         forever begin
             @(negedge axi_cfg.vif.ARESETN);
-                expected_data_q.delete();
-            end
-        
+            expected_data_q.delete();
+        end
     endtask : run_phase
 
     function void report_phase(uvm_phase phase);

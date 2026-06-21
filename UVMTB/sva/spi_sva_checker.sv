@@ -9,11 +9,11 @@ module spi_sva_checker (
 
   property p_spi_reset;
         @(posedge GCLK) !ARESETn |=>
-            ((CS === 1'b1) && (SCK === 1'b0) && (MOSI === 1'b0));
+            ((CS === 1'b1) && (SCLK === 1'b0) && (MOSI === 1'b0));
     endproperty
 
     SPI_RESET_CHK: assert property(p_spi_reset)
-        else $error("SPI reset: 引脚未回 idle (CS=%b SCK=%b MOSI=%b)", CS, SCK, MOSI);
+        else $error("SPI reset: 引脚未回 idle (CS=%b SCK=%b MOSI=%b)", CS, SCLK, MOSI);
 
 
 endmodule : spi_sva_checker

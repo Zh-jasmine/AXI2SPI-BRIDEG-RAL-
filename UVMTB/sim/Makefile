@@ -10,6 +10,7 @@ COMP = vcs \
 	+incdir+. \
 	+incdir+axi \
 	+incdir+spi \
+	+incdir+sva \
 	+incdir+env \
 	+incdir+scoreboard \
 	+incdir+test \

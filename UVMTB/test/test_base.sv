@@ -34,21 +34,19 @@ class test_base extends uvm_test;
         uvm_top.print_topology();
     endfunction : end_of_elaboration_phase
 
-
-    task automatic cfg_spi_defaults();
-        axi_spi_cfg_seq cfg = axi_spi_cfg_seq::type_id::create("cfg_spi_defaults");
+    task automatic seq_start();
+        axi_spi_cfg_seq cfg = axi_spi_cfg_seq::type_id::create("seq_start");
 
         cfg.start_i = 1'b0;
         cfg.start(env.axi_agt.axi_sqr);
-    endtask : cfg_spi_defaults
+    endtask : seq_start
 
-    task automatic wait_spi_frame_done();
+    task automatic wait_spi_done();
         virtual spi_interface spi_vif = env_cfg.spi_cfg.vif;
 
         if (spi_vif.CS === 1'b1)
             @(negedge spi_vif.CS);
         @(posedge spi_vif.CS);
-    endtask : wait_spi_frame_done
-endclass : test_base
+    endtask : wait_spi_done
 
-kdosjkda
+endclass : test_base

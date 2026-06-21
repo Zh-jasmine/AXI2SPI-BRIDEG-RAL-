@@ -22,7 +22,7 @@ class axi_handshake_test extends test_base;
 
         `uvm_info(get_name(), $sformatf("--- %s (aw_delay=%0d, w_delay=%0d, data=0x%0h) ---",
             desc, aw_dly, w_dly, data), UVM_LOW)
-        cfg_spi_defaults();
+        seq_start();
 
         wr = axi_write_seq::type_id::create("wr_data");
         wr.waddr = 32'h20;

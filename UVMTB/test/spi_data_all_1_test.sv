@@ -18,7 +18,7 @@ class spi_data_all_1_test extends test_base;
         seq = axi_spi_cfg_seq::type_id::create("cfg");
         seq.mosi_data_i     = 32'hFF;
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
 
         `uvm_info(get_name(), "[7.2] data=0xFF done", UVM_LOW)
         phase.drop_objection(this);

@@ -20,7 +20,7 @@ class spi_alternating_test extends test_base;
             seq = axi_spi_cfg_seq::type_id::create($sformatf("alt%0d", i));
         seq.mosi_data_i = (i % 2) ? 32'hAA : 32'h55;
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
         end
         `uvm_info(get_name(), "[6.2] alternating 0x55/0xAA done", UVM_LOW)
         phase.drop_objection(this);

@@ -20,15 +20,15 @@ import uvm_pkg::*;
 // SPI agent files (passive)
 `include "spi/spi_seq_item.sv"
 `include "spi/spi_interface.sv"
+`include "spi/spi_miso_slave_model.sv"
 `include "spi/spi_config.sv"
 `include "spi/spi_monitor.sv"
 
 // SVA checkers
-`include "spi/spi_cs_sck_sva.sv"
-`include "spi/spi_sck_speed_sva.sv"
-`include "spi/spi_sck_cs_sva.sv"
-`include "spi/spi_reset_sva.sv"
-`include "axi/axi_reset_sva.sv"
+`include "sva/spi_reset_sva.sv"
+`include "sva/spi_sva_checker.sv"
+`include "sva/axi_reset_sva.sv"
+`include "sva/axi_sva_checker.sv"
 
 // Scoreboard
 `include "scoreboard/tb_scoreboard.sv"
@@ -109,83 +109,36 @@ module tb_top;
     assign spi_vif.MOSI    = MOSI;
     assign spi_vif.CS      = CS;
     // ============================================================
-    // SVA: CS_SCK (EXP=2,4,8)
+    // SVA checkers
     // ============================================================
-    spi_cs_sck_sva #(.EXP(2)) u_cs_sck_2 (
-        .GCLK(spi_vif.GCLK),
-        .SCLK(spi_vif.SCLK),
-        .CS  (spi_vif.CS),
-        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 2)
+    spi_sva_checker u_spi_sva_checker (
+        .GCLK         (spi_vif.GCLK),
+        .ARESETn      (s00_axi_aresetn),
+        .SCLK         (spi_vif.SCLK),
+        .CS           (spi_vif.CS),
+        .MOSI         (spi_vif.MOSI)
     );
 
-    spi_cs_sck_sva #(.EXP(4)) u_cs_sck_4 (
-        .GCLK(spi_vif.GCLK),
-        .SCLK(spi_vif.SCLK),
-        .CS  (spi_vif.CS),
-        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 4)
-    );
-
-    spi_cs_sck_sva #(.EXP(8)) u_cs_sck_8 (
-        .GCLK(spi_vif.GCLK),
-        .SCLK(spi_vif.SCLK),
-        .CS  (spi_vif.CS),
-        .en  (spi_vif.timing_check_en && spi_vif.exp_cs_sck == 8)
-    );
-
-    // ============================================================
-    // SVA: SCK speed (generate 4 档: PER=128,64,32,16)
-    // ============================================================
-    generate
-        for (genvar g = 0; g < 4; g++) begin : gen_sck_speed
-            localparam int VAL = (g == 0) ? 128 : (g == 1) ? 64 : (g == 2) ? 32 : 16;
-            spi_sck_speed_sva #(.PER(VAL)) u (
-                .GCLK(spi_vif.GCLK),
-                .SCLK(spi_vif.SCLK),
-                .CS  (spi_vif.CS),
-                .en  (spi_vif.timing_check_en && spi_vif.exp_sck_speed == g)
-            );
-        end
-    endgenerate
-
-    // ============================================================
-    // SVA: SCK→CS 延迟
-    // ============================================================
-    spi_sck_cs_sva u_sck_cs (
-        .GCLK      (spi_vif.GCLK),
-        .SCLK      (spi_vif.SCLK),
-        .CS        (spi_vif.CS),
-        .en        (spi_vif.timing_check_en),
-        .exp_sck_cs(spi_vif.exp_sck_cs)
-    );
-
-    // ============================================================
-    // SVA: SPI 复位引脚检查
-    // ============================================================
-    spi_reset_sva u_spi_reset (
+    axi_sva_checker u_axi_sva_checker (
         .ACLK   (s00_axi_aclk),
         .ARESETn(s00_axi_aresetn),
-        .CS     (CS),
-        .SCK    (SCK),
-        .MOSI   (MOSI)
-    );
-
-    // ============================================================
-    // SVA: AXI 复位协议检查
-    // ============================================================
-    axi_reset_sva u_axi_reset (
-        .ACLK   (s00_axi_aclk),
-        .ARESETn(s00_axi_aresetn),
-        .AWREADY(axi_vif.AWREADY),
-        .WREADY (axi_vif.WREADY),
-        .BVALID (axi_vif.BVALID),
-        .BRESP  (axi_vif.BRESP),
-        .ARREADY(axi_vif.ARREADY),
-        .RVALID (axi_vif.RVALID),
-        .RRESP  (axi_vif.RRESP),
-        .RDATA  (axi_vif.RDATA),
+        .AWADDR (axi_vif.AWADDR),
         .AWVALID(axi_vif.AWVALID),
+        .AWREADY(axi_vif.AWREADY),
+        .WDATA  (axi_vif.WDATA),
+        .WSTRB  (axi_vif.WSTRB),
         .WVALID (axi_vif.WVALID),
-        .ARVALID(axi_vif.ARVALID)
+        .WREADY (axi_vif.WREADY),
+        .BRESP  (axi_vif.BRESP),
+        .BVALID (axi_vif.BVALID),
+        .BREADY (axi_vif.BREADY),
+        .ARADDR (axi_vif.ARADDR),
+        .ARVALID(axi_vif.ARVALID),
+        .ARREADY(axi_vif.ARREADY),
+        .RDATA  (axi_vif.RDATA),
+        .RRESP  (axi_vif.RRESP),
+        .RVALID (axi_vif.RVALID),
+        .RREADY (axi_vif.RREADY)
     );
 
     // ============================================================
@@ -220,24 +173,15 @@ module tb_top;
     );
 
     // ============================================================
-    // MISO slave model (8-bit, Mode 0: CPOL=0/CPHA=0)
-    //  CS↓ 装载 miso_tx_data，CS 低时每个 SCK 下降沿左移，MISO 输出当前 MSB；
-    //  DUT 在 SCK 上升沿采样 → MSB first。用 GCLK 同步采边沿，避免多驱动。
-    //  注：DUT 在 PRE_TRANS（首个 SCK 沿前）提前采第一位，若 rdata 差一位，
-    //  按波形调 load/shift 时机即可。test 通过 spi_vif.miso_tx_data 设回送字节。
+    // Simple MISO slave model for readback tests
     // ============================================================
-    logic [7:0] miso_sr;
-    logic       sck_d, cs_d;
-    always @(posedge s00_axi_aclk) begin
-        sck_d <= SCK;
-        cs_d  <= CS;
-        if (cs_d && !CS)                       // CS 下降沿：装载
-            miso_sr <= spi_vif.miso_tx_data;
-        else if (!CS && sck_d && !SCK)         // CS 低 + SCK 下降沿：左移
-            miso_sr <= {miso_sr[6:0], 1'b0};
-    end
-    assign spi_vif.MISO = miso_sr[7];
-
+    spi_miso_slave_model u_miso_model (
+        .GCLK   (spi_vif.GCLK),
+        .SCLK   (spi_vif.SCLK),
+        .CS     (spi_vif.CS),
+        .tx_data(spi_vif.miso_tx_data),
+        .MISO   (spi_vif.MISO)
+    );
     // ========== UVM start ==========
     initial begin
         $fsdbDumpfile("tb_top.fsdb");

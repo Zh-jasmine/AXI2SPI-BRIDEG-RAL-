@@ -17,7 +17,7 @@ class reset_mid_test extends test_base;
         virtual spi_interface spi_vif = env_cfg.spi_cfg.vif;
         phase.raise_objection(this);
         #200;
-        cfg_spi_defaults();
+        seq_start();
 
         wr = axi_write_seq::type_id::create("wr_data");
         wr.waddr = 32'h20;  wr.wdata = 32'hA5;
@@ -43,7 +43,7 @@ class reset_mid_test extends test_base;
         seq = axi_spi_cfg_seq::type_id::create("seq");
         seq.mosi_data_i     = 32'h3C;
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
 
         `uvm_info(get_name(), "[7.3] reset mid TX + recovery done", UVM_LOW)
         phase.drop_objection(this);

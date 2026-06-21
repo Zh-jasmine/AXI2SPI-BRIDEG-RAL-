@@ -30,7 +30,7 @@ class spi_random_test extends test_base;
                 `uvm_error(get_name(), "axi_spi_cfg_seq randomize failed")
 
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
         end
 
         `uvm_info(get_name(), $sformatf("random regression done: %0d frames", num_frames), UVM_LOW)

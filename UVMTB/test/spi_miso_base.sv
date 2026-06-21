@@ -25,7 +25,7 @@ class spi_miso_base_test extends test_base;
         cfg = axi_spi_cfg_seq::type_id::create("cfg");
         cfg.mosi_data_i     = 32'hA5;
         cfg.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
 
         rd = axi_read_seq::type_id::create("rd_miso");
         rd.raddr = 32'h24;

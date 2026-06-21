@@ -23,7 +23,7 @@ class reset_sva_test extends test_base;
         automatic axi_spi_cfg_seq seq = axi_spi_cfg_seq::type_id::create("seq_frame");
         seq.mosi_data_i     = data;
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
     endtask
 
     task run_phase(uvm_phase phase);
@@ -51,7 +51,7 @@ class reset_sva_test extends test_base;
 
         // ---- C: reset mid transaction ----
         `uvm_info(get_name(), "[C] reset mid transaction", UVM_LOW)
-        cfg_spi_defaults();
+        seq_start();
         wr = axi_write_seq::type_id::create("wr_data");
         wr.waddr = 32'h20;  wr.wdata = 32'hA5;  wr.start(env.axi_agt.axi_sqr);
         wr = axi_write_seq::type_id::create("wr0");

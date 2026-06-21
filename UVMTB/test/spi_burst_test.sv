@@ -21,7 +21,7 @@ class spi_burst_test extends test_base;
             seq = axi_spi_cfg_seq::type_id::create($sformatf("frame%0d", i));
         seq.mosi_data_i = data_q[i];
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
         end
         `uvm_info(get_name(), "[6.1] 4-frame burst done", UVM_LOW)
         phase.drop_objection(this);

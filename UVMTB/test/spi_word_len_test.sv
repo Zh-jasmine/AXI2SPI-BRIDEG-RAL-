@@ -30,7 +30,7 @@ class spi_word_len_test extends test_base;
         seq.word_len_i  = word_len_enc;
         seq.mosi_data_i     = wdata;
         seq.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
     endtask : foreach_word_len
 
 endclass : spi_word_len_test

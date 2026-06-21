@@ -57,7 +57,7 @@ class axi_concurrent_test extends test_base;
                         axi_spi_cfg_seq::type_id::create($sformatf("f%0d", i));
         f.mosi_data_i = 32'hC0 + i;
         f.start(env.axi_agt.axi_sqr);
-        wait_spi_frame_done();
+        wait_spi_done();
                 end
                 wr_done = 1;
             end
